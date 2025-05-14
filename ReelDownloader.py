@@ -146,10 +146,21 @@ def main():
     
     download_folder = "VIDEOS"  # Set this to your desired download folder
     
-    # Read reel links from the .txt file
-    with open('ordered_reel_links.txt', 'r') as file:
-        reel_links = [line.strip() for line in file.readlines()]
-        for reel_link in reel_links:
+    # Read only the first 50 reel links from the .txt file and remove them after processing
+    input_file = 'ordered_reel_links_copy.txt'
+    with open(input_file, 'r') as file:
+        lines = file.readlines()
+
+    first_5 = [line.strip() for line in lines[:5]]
+    remaining = lines[5:]
+
+    # Write back the remaining links to the file
+    with open(input_file, 'w') as file:
+        file.writelines(remaining)
+
+    # Download reels for the first 50 links
+    for reel_link in first_5:
+        if reel_link:  # skip empty lines
             download_with_retry(reel_link, download_folder)
 
 if __name__ == "__main__":
