@@ -161,6 +161,7 @@ def main():
     # Download reels for the first 50 links
     for reel_link in first_5:
         if reel_link:  # skip empty lines
+            print(f"Downloading reel: {reel_link}")
             download_with_retry(reel_link, download_folder)
 
 if __name__ == "__main__":
