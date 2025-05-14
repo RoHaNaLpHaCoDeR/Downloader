@@ -72,6 +72,9 @@ def rename_downloaded_file(download_folder):
         latest_file = max(files, key=lambda x: os.path.getctime(os.path.join(download_folder, x)))
         latest_file_path = os.path.join(download_folder, latest_file)
         new_file_path = os.path.join(download_folder, new_filename)
+        print(f"latest_file: {latest_file}")
+        print(f"latest_file_path: {latest_file_path}")
+        print(f"new_file_path: {new_file_path}")
         shutil.move(latest_file_path, new_file_path)
         print(f"File renamed to: {new_filename}")
 
