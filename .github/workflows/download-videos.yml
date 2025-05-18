@@ -2,8 +2,6 @@ name: Download Videos with Selenium
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '0 */2 * * *'
 
 jobs:
   download-videos:
