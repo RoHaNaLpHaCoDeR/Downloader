@@ -74,6 +74,20 @@ def increment_counter(counter_file):
         f.write(str(value))
     return value
 
+def split_file_binary(input_path, output_path1, output_path2):
+    try:
+        with open(input_path, 'rb') as f:
+            data = f.read()
+        half = len(data) // 2
+        with open(output_path1, 'wb') as f1:
+            f1.write(data[:half])
+        with open(output_path2, 'wb') as f2:
+            f2.write(data[half:])
+        return True
+    except Exception as e:
+        print(f"Binary split failed: {e}")
+        return False
+
 def rename_and_move_downloaded_file(temp_folder, videos_folder, counter_file):
     # Wait until there are no active downloads
     while not is_download_complete(temp_folder):
@@ -89,13 +103,19 @@ def rename_and_move_downloaded_file(temp_folder, videos_folder, counter_file):
         shutil.move(latest_file_path, renamed_path)
         size_mb = os.path.getsize(renamed_path) / (1024 * 1024)
         if size_mb > 100:
-            zip_path = os.path.join(temp_folder, f"Video_{counter}.zip")
-            with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
-                zipf.write(renamed_path, arcname=new_filename)
-            os.remove(renamed_path)
-            final_path = os.path.join(videos_folder, f"Video_{counter}.zip")
-            shutil.move(zip_path, final_path)
-            print(f"Compressed and moved to: {final_path}")
+            part1 = os.path.join(temp_folder, f"Video_{counter}_part_1.mp4")
+            part2 = os.path.join(temp_folder, f"Video_{counter}_part_2.mp4")
+            print(f"Binary splitting {renamed_path} (size: {size_mb:.2f} MB)...")
+            if split_file_binary(renamed_path, part1, part2):
+                os.remove(renamed_path)
+                shutil.move(part1, os.path.join(videos_folder, f"Video_{counter}_part_1.mp4"))
+                shutil.move(part2, os.path.join(videos_folder, f"Video_{counter}_part_2.mp4"))
+                print(f"Split and moved to: Video_{counter}_part_1.mp4 and Video_{counter}_part_2.mp4")
+            else:
+                # If splitting fails, move original
+                final_path = os.path.join(videos_folder, new_filename)
+                shutil.move(renamed_path, final_path)
+                print(f"Splitting failed, moved original to: {final_path}")
         else:
             final_path = os.path.join(videos_folder, new_filename)
             shutil.move(renamed_path, final_path)
@@ -175,7 +195,7 @@ def main():
         os.makedirs(temp_folder)
     if not os.path.exists(videos_folder):
         os.makedirs(videos_folder)
-    input_file = 'temp.txt'
+    input_file = 'links_foodandstreett_download.txt'
     with open(input_file, 'r') as file:
         lines = file.readlines()
 
