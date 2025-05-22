@@ -26,23 +26,6 @@ jobs:
         run: |
           python ReelDownloader.py
 
-      - name: Install Git LFS
-        run: |
-          sudo apt-get update
-          sudo apt-get install git-lfs
-          git lfs install
-
-      - name: Track large files (>100MB) using Git LFS
-        run: |
-          find VIDEOS/ -type f -size +100M | while read file; do
-            echo "Tracking $file with Git LFS"
-            git lfs track "$file"
-            git add "$file"
-          done
-          if [ -f .gitattributes ]; then
-            git add .gitattributes
-          fi
-
       - name: Commit and push changes
         run: |
           git config --global user.name "github-actions[bot]"
