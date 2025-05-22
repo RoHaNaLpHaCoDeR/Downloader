@@ -14,6 +14,7 @@ import shutil
 import random
 import time
 import pandas as pd
+import zipfile
 
 # Setup Selenium WebDriver to use chrome with automatic download settings
 def setup_selenium(download_folder):
@@ -59,28 +60,51 @@ def is_download_complete(download_folder):
     temp_files = [f for f in os.listdir(download_folder) if f.endswith('.crdownload') or f.endswith('.tmp')]
     return len(temp_files) == 0
 
-# Function to handle file renaming after download
-def rename_downloaded_file(download_folder):
+def get_counter_value(counter_file):
+    if not os.path.exists(counter_file):
+        with open(counter_file, 'w') as f:
+            f.write('1')
+        return 1
+    with open(counter_file, 'r') as f:
+        return int(f.read().strip())
+
+def increment_counter(counter_file):
+    value = get_counter_value(counter_file) + 1
+    with open(counter_file, 'w') as f:
+        f.write(str(value))
+    return value
+
+def rename_and_move_downloaded_file(temp_folder, videos_folder, counter_file):
     # Wait until there are no active downloads
-    while not is_download_complete(download_folder):
+    while not is_download_complete(temp_folder):
         time.sleep(5)  # Check every 5 seconds
-    files = [f for f in os.listdir(download_folder) if f.endswith('.mp4')]
-    # Generate a serialized filename
-    new_filename = get_next_serialized_filename(download_folder)
-    print("new_filename = ",new_filename)
+    # Exclude 'null.mp4' from the list
+    files = [f for f in os.listdir(temp_folder) if f.endswith('.mp4') and f != 'null.mp4']
     if files:
-        latest_file = max(files, key=lambda x: os.path.getctime(os.path.join(download_folder, x)))
-        latest_file_path = os.path.join(download_folder, latest_file)
-        new_file_path = os.path.join(download_folder, new_filename)
-        print(f"latest_file: {latest_file}")
-        print(f"latest_file_path: {latest_file_path}")
-        print(f"new_file_path: {new_file_path}")
-        shutil.move(latest_file_path, new_file_path)
-        print(f"File renamed to: {new_filename}")
+        latest_file = max(files, key=lambda x: os.path.getctime(os.path.join(temp_folder, x)))
+        latest_file_path = os.path.join(temp_folder, latest_file)
+        counter = get_counter_value(counter_file)
+        new_filename = f"Video_{counter}.mp4"
+        renamed_path = os.path.join(temp_folder, new_filename)
+        shutil.move(latest_file_path, renamed_path)
+        size_mb = os.path.getsize(renamed_path) / (1024 * 1024)
+        if size_mb > 100:
+            zip_path = os.path.join(temp_folder, f"Video_{counter}.zip")
+            with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+                zipf.write(renamed_path, arcname=new_filename)
+            os.remove(renamed_path)
+            final_path = os.path.join(videos_folder, f"Video_{counter}.zip")
+            shutil.move(zip_path, final_path)
+            print(f"Compressed and moved to: {final_path}")
+        else:
+            final_path = os.path.join(videos_folder, new_filename)
+            shutil.move(renamed_path, final_path)
+            print(f"File renamed and moved to: {final_path}")
+        increment_counter(counter_file)
 
 # Function to download Instagram reels using sssinstagram.net
-def download_instagram_reels_sssinstagram(reel_url, download_folder):
-    driver = setup_selenium(download_folder)
+def download_instagram_reels_sssinstagram(reel_url, temp_folder, videos_folder, counter_file):
+    driver = setup_selenium(temp_folder)
     # Navigate to sssinstagram's Instagram Reel Downloader
     driver.get("https://sssinstagram.com/reels-downloader")
     time.sleep(10)
@@ -113,7 +137,7 @@ def download_instagram_reels_sssinstagram(reel_url, download_folder):
         time.sleep(10)  # Give time for the download to start
         
         # Rename the file after download
-        rename_downloaded_file(download_folder)
+        rename_and_move_downloaded_file(temp_folder, videos_folder, counter_file)
 
         # print(f"Download attempt finished for: {reel_url}")
         driver.quit() 
@@ -125,13 +149,13 @@ def download_instagram_reels_sssinstagram(reel_url, download_folder):
         return 0
     
 # Add this function to handle retries
-def download_with_retry(reel_url, download_folder, max_retries=7):
+def download_with_retry(reel_url, temp_folder, videos_folder, counter_file, max_retries=7):
     attempt = 0
     success = False
 
     while attempt < max_retries and not success:
         print("attempt Reel= ",attempt)
-        number = download_instagram_reels_sssinstagram(reel_url, download_folder)
+        number = download_instagram_reels_sssinstagram(reel_url, temp_folder, videos_folder, counter_file)
         if number == 1:
             success = True
             break
@@ -144,13 +168,14 @@ def download_with_retry(reel_url, download_folder, max_retries=7):
                   
 # Main function to automate the process
 def main():
-    
-    # STEP 1
-    
-    download_folder = "VIDEOS"  # Set this to your desired download folder
-    
-    # Read only the first 50 reel links from the .txt file and remove them after processing
-    input_file = 'links_foodandstreett_download.txt'
+    temp_folder = "temp"
+    videos_folder = "VIDEOS"
+    counter_file = "counter.txt"
+    if not os.path.exists(temp_folder):
+        os.makedirs(temp_folder)
+    if not os.path.exists(videos_folder):
+        os.makedirs(videos_folder)
+    input_file = 'temp.txt'
     with open(input_file, 'r') as file:
         lines = file.readlines()
 
@@ -165,7 +190,7 @@ def main():
     for reel_link in first_50:
         if reel_link:  # skip empty lines
             print(f"Downloading reel: {reel_link}")
-            download_with_retry(reel_link, download_folder)
+            download_with_retry(reel_link, temp_folder, videos_folder, counter_file)
 
 if __name__ == "__main__":
     main()
