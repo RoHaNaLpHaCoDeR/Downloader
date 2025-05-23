@@ -138,13 +138,13 @@ def download_instagram_reels_sssinstagram(reel_url, temp_folder, videos_folder, 
     time.sleep(10)
     try:
         # Find the input box and paste the reel URL
-        input_box = WebDriverWait(driver, 5).until(
+        input_box = WebDriverWait(driver, 20).until(
             EC.presence_of_element_located((By.XPATH, "//input[@id='input']"))
         )
         input_box.send_keys(reel_url)
         
         # Click the Download button to submit the URL
-        download_button = WebDriverWait(driver, 5).until(
+        download_button = WebDriverWait(driver, 20).until(
             EC.presence_of_element_located((By.XPATH, "//button[@type='submit']"))
         )
         download_button.click()
@@ -152,7 +152,7 @@ def download_instagram_reels_sssinstagram(reel_url, temp_folder, videos_folder, 
 
     
         # Wait for either of the "Download Video" buttons to appear and get the href
-        download_video_button = WebDriverWait(driver, 10).until(
+        download_video_button = WebDriverWait(driver, 20).until(
             EC.presence_of_element_located((By.XPATH, "//a[@class='button button--filled button__download']"))
         )
 
