@@ -94,14 +94,21 @@ def rename_and_move_downloaded_file(temp_folder, videos_folder, counter_file, re
         time.sleep(5)  # Check every 5 seconds
     # Exclude 'null.mp4' from the list
     files = [f for f in os.listdir(temp_folder) if f.endswith('.mp4') and f != 'null.mp4']
+    print(f"Files in temp folder: {files}")
     if files:
         latest_file = max(files, key=lambda x: os.path.getctime(os.path.join(temp_folder, x)))
+        print(f"Latest file: {latest_file}")
         latest_file_path = os.path.join(temp_folder, latest_file)
+        print(f"Latest file path: {latest_file_path}")
         counter = get_counter_value(counter_file)
+        print(f"Counter value: {counter}")
         new_filename = f"Video_{counter}.mp4"
+        print(f"New filename: {new_filename}")
         renamed_path = os.path.join(temp_folder, new_filename)
+        print(f"Renamed path: {renamed_path}")
         shutil.move(latest_file_path, renamed_path)
         size_mb = os.path.getsize(renamed_path) / (1024 * 1024)
+        print(f"File size (MB): {size_mb}")
         if size_mb > 100:
             print(f"File {renamed_path} is too large ({size_mb:.2f} MB). Removing...")
             os.remove(renamed_path)
