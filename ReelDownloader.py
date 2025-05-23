@@ -88,7 +88,7 @@ def split_file_binary(input_path, output_path1, output_path2):
         print(f"Binary split failed: {e}")
         return False
 
-def rename_and_move_downloaded_file(temp_folder, videos_folder, counter_file):
+def rename_and_move_downloaded_file(temp_folder, videos_folder, counter_file, reel_url, links_file):
     # Wait until there are no active downloads
     while not is_download_complete(temp_folder):
         time.sleep(5)  # Check every 5 seconds
@@ -103,19 +103,20 @@ def rename_and_move_downloaded_file(temp_folder, videos_folder, counter_file):
         shutil.move(latest_file_path, renamed_path)
         size_mb = os.path.getsize(renamed_path) / (1024 * 1024)
         if size_mb > 100:
-            part1 = os.path.join(temp_folder, f"Video_{counter}_part_1.mp4")
-            part2 = os.path.join(temp_folder, f"Video_{counter}_part_2.mp4")
-            print(f"Binary splitting {renamed_path} (size: {size_mb:.2f} MB)...")
-            if split_file_binary(renamed_path, part1, part2):
-                os.remove(renamed_path)
-                shutil.move(part1, os.path.join(videos_folder, f"Video_{counter}_part_1.mp4"))
-                shutil.move(part2, os.path.join(videos_folder, f"Video_{counter}_part_2.mp4"))
-                print(f"Split and moved to: Video_{counter}_part_1.mp4 and Video_{counter}_part_2.mp4")
-            else:
-                # If splitting fails, move original
-                final_path = os.path.join(videos_folder, new_filename)
-                shutil.move(renamed_path, final_path)
-                print(f"Splitting failed, moved original to: {final_path}")
+            print(f"File {renamed_path} is too large ({size_mb:.2f} MB). Removing...")
+            os.remove(renamed_path)
+
+            # Update links.txt to mark the link as "LARGE FILE"
+            with open(links_file, 'r') as file:
+                lines = file.readlines()
+
+            # Update the specific line in memory and write back once
+            if reel_url in lines:
+                line_index = lines.index(reel_url + '\n')
+                lines[line_index] = f"{reel_url} - LARGE FILE\n"
+
+            with open(links_file, 'w') as file:
+                file.writelines(lines)
         else:
             final_path = os.path.join(videos_folder, new_filename)
             shutil.move(renamed_path, final_path)
@@ -123,7 +124,7 @@ def rename_and_move_downloaded_file(temp_folder, videos_folder, counter_file):
         increment_counter(counter_file)
 
 # Function to download Instagram reels using sssinstagram.net
-def download_instagram_reels_sssinstagram(reel_url, temp_folder, videos_folder, counter_file):
+def download_instagram_reels_sssinstagram(reel_url, temp_folder, videos_folder, counter_file, links_file):
     driver = setup_selenium(temp_folder)
     # Navigate to sssinstagram's Instagram Reel Downloader
     driver.get("https://sssinstagram.com/reels-downloader")
@@ -157,7 +158,7 @@ def download_instagram_reels_sssinstagram(reel_url, temp_folder, videos_folder, 
         time.sleep(10)  # Give time for the download to start
         
         # Rename the file after download
-        rename_and_move_downloaded_file(temp_folder, videos_folder, counter_file)
+        rename_and_move_downloaded_file(temp_folder, videos_folder, counter_file, reel_url,links_file)
 
         # print(f"Download attempt finished for: {reel_url}")
         driver.quit() 
@@ -169,13 +170,13 @@ def download_instagram_reels_sssinstagram(reel_url, temp_folder, videos_folder, 
         return 0
     
 # Add this function to handle retries
-def download_with_retry(reel_url, temp_folder, videos_folder, counter_file, max_retries=7):
+def download_with_retry(reel_url, temp_folder, videos_folder, counter_file, links_file, max_retries=7):
     attempt = 0
     success = False
 
     while attempt < max_retries and not success:
         print("attempt Reel= ",attempt)
-        number = download_instagram_reels_sssinstagram(reel_url, temp_folder, videos_folder, counter_file)
+        number = download_instagram_reels_sssinstagram(reel_url, temp_folder, videos_folder, counter_file, links_file)
         if number == 1:
             success = True
             break
@@ -191,26 +192,14 @@ def main():
     temp_folder = "temp"
     videos_folder = "VIDEOS"
     counter_file = "counter.txt"
-    if not os.path.exists(temp_folder):
-        os.makedirs(temp_folder)
-    if not os.path.exists(videos_folder):
-        os.makedirs(videos_folder)
-    input_file = 'links_foodandstreett_download.txt'
-    with open(input_file, 'r') as file:
-        lines = file.readlines()
-
-    first_50 = [line.strip() for line in lines[:50]]
-    remaining = lines[50:]
-
-    # Write back the remaining links to the file
-    with open(input_file, 'w') as file:
-        file.writelines(remaining)
-
-    # Download reels for the first 50 links
-    for reel_link in first_50:
-        if reel_link:  # skip empty lines
+    links_file = "links.txt"
+    
+    # Read reel links from the .txt file
+    with open(links_file, 'r') as file:
+        reel_links = [line.strip() for line in file.readlines()]
+        for reel_link in reel_links:
             print(f"Downloading reel: {reel_link}")
-            download_with_retry(reel_link, temp_folder, videos_folder, counter_file)
+            download_with_retry(reel_link, temp_folder, videos_folder, counter_file, links_file)
 
 if __name__ == "__main__":
     main()

@@ -2,8 +2,6 @@ name: Download Videos with Selenium
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '0 */1 * * *'
 
 jobs:
   download-videos:
@@ -26,11 +24,20 @@ jobs:
         run: |
           python ReelDownloader.py
 
-      - name: Commit and push changes
+      - name: Commit and push changes in batches
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add .
-          git commit -m "Add downloaded videos" || echo "Nothing to commit"
+          git add -N .
+          changes=$(git diff --cached --name-only | wc -l)
+          if [ "$changes" -gt 0 ]; then
+          while [ "$changes" -gt 0 ]; do
+            git diff --cached --name-only | head -n 5 | xargs git add
+            git commit -m "Add downloaded videos (batch commit)" || echo "Nothing to commit"
+            changes=$(git diff --cached --name-only | wc -l)
+          done
           git pull --rebase origin main || echo "No changes to pull"
           git push || echo "No changes to push"
+            else
+          echo "No changes to commit"
+            fi
