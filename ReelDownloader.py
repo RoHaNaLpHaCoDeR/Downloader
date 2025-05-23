@@ -91,6 +91,7 @@ def split_file_binary(input_path, output_path1, output_path2):
 def rename_and_move_downloaded_file(temp_folder, videos_folder, counter_file, reel_url, links_file):
     # Wait until there are no active downloads
     while not is_download_complete(temp_folder):
+        print("Waiting for download to complete...")
         time.sleep(5)  # Check every 5 seconds
     # Exclude 'null.mp4' from the list
     files = [f for f in os.listdir(temp_folder) if f.endswith('.mp4') and f != 'null.mp4']
