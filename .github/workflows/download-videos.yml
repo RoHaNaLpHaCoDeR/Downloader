@@ -26,7 +26,7 @@ jobs:
 
       - name: Commit in batches of 50
         run: |
-          cd videos
+          cd VIDEOS
           files=(*)
           total=${#files[@]}
           batch_size=5
