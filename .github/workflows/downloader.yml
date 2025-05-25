@@ -34,7 +34,6 @@ jobs:
           echo "Total files to commit: $total"
           echo "Batch size: $batch_size"
 
-          cd ..
           for ((i=0; i<$total; i+=$batch_size)); do
             echo "Processing batch: $((i+1)) to $((i+batch_size))"
 
