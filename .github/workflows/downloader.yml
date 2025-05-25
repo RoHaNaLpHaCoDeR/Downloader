@@ -46,9 +46,6 @@ jobs:
             git commit -m "Batch commit: files $((i+1)) to $((i+batch_size))"
             echo "Committed batch: $((i+1)) to $((i+batch_size))"
 
-            git pull --rebase origin main
-            echo "Rebased with origin/main"
-
             git push origin main
             echo "Pushed batch: $((i+1)) to $((i+batch_size))"
           done
