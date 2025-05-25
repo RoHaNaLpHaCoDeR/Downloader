@@ -24,7 +24,7 @@ jobs:
         run: |
           python ReelDownloader.py
 
-      - name: Commit in batches of 50
+      - name: Commit in batches of 5
         run: |
           cd VIDEOS
           files=(*)
@@ -34,19 +34,31 @@ jobs:
           echo "Total files to commit: $total"
           echo "Batch size: $batch_size"
 
+          cd ..
           for ((i=0; i<$total; i+=$batch_size)); do
-            echo "Processing batch: $((i+1)) to $((i+batch_size))"
+            batch=("${files[@]:i:batch_size}")
+            echo "Processing batch: $((i+1)) to $((i + ${#batch[@]}))"
+            echo "Files added to staging: ${batch[@]}"
 
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
 
-            git add "${files[@]:i:batch_size}"
-            echo "Files added to staging: ${files[@]:i:batch_size}"
-
-            git commit -m "Batch commit: files $((i+1)) to $((i+batch_size))"
-            echo "Committed batch: $((i+1)) to $((i+batch_size))"
+            git add "${batch[@]/#/VIDEOS/}"  # Prepend path since we're back in repo root
+            git commit -m "Batch commit: files $((i+1)) to $((i + ${#batch[@]}))"
+            echo "Committed batch: $((i+1)) to $((i + ${#batch[@]}))"
 
             git push origin main
-            echo "Pushed batch: $((i+1)) to $((i+batch_size))"
+            echo "Pushed batch: $((i+1)) to $((i + ${#batch[@]}))"
           done
+
+          # Now commit counter.txt if it has changed
+          if git diff --quiet counter.txt; then
+            echo "No changes to counter.txt"
+          else
+            git add counter.txt
+            git commit -m "Update counter.txt"
+            git push origin main
+            echo "Committed and pushed counter.txt"
+          fi
+
 
