@@ -1,4 +1,4 @@
-name: Download Videos with Selenium
+name: Download Videos
 
 on:
   workflow_dispatch:
