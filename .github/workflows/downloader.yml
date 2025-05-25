@@ -51,14 +51,12 @@ jobs:
             echo "Pushed batch: $((i+1)) to $((i + ${#batch[@]}))"
           done
 
-          # Now commit counter.txt if it has changed
-          if git diff --quiet counter.txt; then
-            echo "No changes to counter.txt"
-          else
-            git add counter.txt
-            git commit -m "Update counter.txt"
-            git push origin main
-            echo "Committed and pushed counter.txt"
-          fi
-
-
+      - name: Commit counter.txt if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add counter.txt
+          git commit -m "Update counter.txt"
+          git push origin main
+          echo "Committed and pushed counter.txt"
+          
