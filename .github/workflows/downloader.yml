@@ -52,12 +52,12 @@ jobs:
           fi
 
           
-      - name: Commit in batches of 5
+      - name: Commit in batches of 2
         run: |
           cd VIDEOS
           files=(*)
           total=${#files[@]}
-          batch_size=5
+          batch_size=2
 
           echo "Total files to commit: $total"
           echo "Batch size: $batch_size"
