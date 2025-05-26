@@ -1,9 +1,0 @@
-VIDEOS/Video_152.mp4 filter=lfs diff=lfs merge=lfs -text
-VIDEOS/Video_226.mp4 filter=lfs diff=lfs merge=lfs -text
-VIDEOS/Video_498.mp4 filter=lfs diff=lfs merge=lfs -text
-VIDEOS/Video_458.mp4 filter=lfs diff=lfs merge=lfs -text
-VIDEOS/Video_619.mp4 filter=lfs diff=lfs merge=lfs -text
-VIDEOS/Video_666.mp4 filter=lfs diff=lfs merge=lfs -text
-VIDEOS/Video_676.mp4 filter=lfs diff=lfs merge=lfs -text
-VIDEOS/Video_670.mp4 filter=lfs diff=lfs merge=lfs -text
-VIDEOS/Video_726.mp4 filter=lfs diff=lfs merge=lfs -text
