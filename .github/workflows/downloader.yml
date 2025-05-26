@@ -52,7 +52,7 @@ jobs:
           fi
 
           
-      - name: Commit in batches of 2
+      - name: Commit in batches of 50
         run: |
           # Get list of untracked files in VIDEOS/
           mapfile -t files < <(git ls-files --others --exclude-standard VIDEOS/)
@@ -66,7 +66,7 @@ jobs:
           done
 
           total=${#filtered_files[@]}
-          batch_size=2
+          batch_size=50
 
           echo "Total files to commit: $total"
           echo "Batch size: $batch_size"
