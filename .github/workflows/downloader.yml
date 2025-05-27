@@ -33,6 +33,7 @@ jobs:
             git config user.email "github-actions[bot]@users.noreply.github.com"
             git add counter.txt
             git commit -m "Update counter.txt"
+            git pull --rebase origin main || echo "No changes to pull"
             git push origin main
             echo "Committed and pushed counter.txt"
           fi
@@ -47,6 +48,7 @@ jobs:
             git config user.email "github-actions[bot]@users.noreply.github.com"
             git add links.txt
             git commit -m "Update links.txt"
+            git pull --rebase origin main || echo "No changes to pull"
             git push origin main
             echo "Committed and pushed links.txt"
           fi
@@ -83,6 +85,7 @@ jobs:
             git commit -m "Batch commit: files $((i+1)) to $((i + ${#batch[@]}))"
             echo "Committed batch: $((i+1)) to $((i + ${#batch[@]}))"
 
+            git pull --rebase origin main || echo "No changes to pull"
             git push origin main
             echo "Pushed batch: $((i+1)) to $((i + ${#batch[@]}))"
           done
