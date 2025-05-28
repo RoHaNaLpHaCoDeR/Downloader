@@ -55,6 +55,7 @@ jobs:
 
           
       - name: Commit in batches of 50
+        shell: bash
         run: |
           # Get list of untracked files in VIDEOS/
           mapfile -t files < <(git ls-files --others --exclude-standard VIDEOS/)
