@@ -65,11 +65,10 @@ def get_next_serialized_filename(download_folder):
 # Function to check if the download is complete
 def is_download_complete(download_folder):
     print(f"[LOG] Checking if download is complete in folder: {download_folder}")
-    temp_files = [f for f in os.listdir(download_folder) if f.endswith('.crdownload') or f.endswith('.tmp')]
-    print(f"[LOG] Temporary files: {temp_files}")
-    is_complete = len(temp_files) == 0
-    print(f"[LOG] Download complete: {is_complete}")
-    return is_complete
+    temp_files = [f for f in os.listdir(download_folder) if f.endswith('.mp4')]
+    if temp_files:
+        print(f"[LOG] Non-MP4 files: {temp_files}")
+        return True
 
 def get_counter_value(counter_file):
     print(f"[LOG] Getting counter value from file: {counter_file}")
@@ -172,10 +171,11 @@ def download_instagram_reels_sssinstagram(reel_url, temp_folder, videos_folder, 
         print(f"[LOG] Download link extracted: {video_download_link}")
         
         # Download the video manually using the extracted href link
+        time.sleep(30)
         print("[LOG] Navigating to the video download link...")
         driver.get(video_download_link)
         print("[LOG] Waiting for the download to start...")
-        time.sleep(30)  # Give time for the download to start
+        time.sleep(10)  # Give time for the download to start
         
         # Rename the file after download
         print("[LOG] Attempting to rename and move the downloaded file...")
