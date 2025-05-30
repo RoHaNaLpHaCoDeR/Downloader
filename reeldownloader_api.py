@@ -34,7 +34,7 @@ except FileNotFoundError:
     print("Session saved!")
 
 # Create download folder
-download_dir = Path("downloads")
+download_dir = Path("VIDEOS")
 download_dir.mkdir(exist_ok=True)
 caption_log = download_dir / "captions.txt"
 
