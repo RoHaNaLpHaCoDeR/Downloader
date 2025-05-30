@@ -1,7 +1,7 @@
 import yt_dlp
 import os
 
-DOWNLOAD_DIR = "downloads"
+DOWNLOAD_DIR = "VIDEOS"
 LINKS_FILE = "links.txt"
 COUNTER_FILE = "counter.txt"
 CAPTION_FILE = os.path.join(DOWNLOAD_DIR, "captions.txt")
