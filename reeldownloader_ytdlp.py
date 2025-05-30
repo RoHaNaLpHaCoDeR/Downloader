@@ -1,5 +1,8 @@
 import yt_dlp
 import os
+import sys
+import io
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 DOWNLOAD_DIR = "VIDEOS"
 LINKS_FILE = "links.txt"
@@ -14,7 +17,7 @@ with open(LINKS_FILE, "r", encoding="utf-8") as f:
 
 # Load counter
 if os.path.exists(COUNTER_FILE):
-    with open(COUNTER_FILE, "r") as f:
+    with open(COUNTER_FILE, "r", encoding="utf-8") as f:
         counter = int(f.read().strip())
 else:
     counter = 0
@@ -23,7 +26,7 @@ updated = False
 
 for i in range(counter, len(reel_urls)):
     url = reel_urls[i]
-    print(f"⬇️ Downloading Reel {i + 1}: {url}")
+    print(f"Downloading Reel {i + 1}: {url}")
 
     output_template = os.path.join(DOWNLOAD_DIR, f"Video_{i + 1}.%(ext)s")
 
@@ -47,15 +50,15 @@ for i in range(counter, len(reel_urls)):
             if file_size > 100:
                 os.remove(video_file)
                 reel_urls[i] = f"{url} - large file"
-                print(f"⚠️ Skipped Reel {i + 1}: File > 100MB")
+                print(f"Skipped Reel {i + 1}: File > 100MB")
             else:
                 caption = info.get("description", "").replace("\n", " ").strip()
                 with open(CAPTION_FILE, "a", encoding="utf-8") as fcap:
                     fcap.write(f"{i + 1},{caption}\n")
-                print(f"✅ Saved Video_{i + 1}.mp4 and caption.")
+                print(f"Saved Video_{i + 1}.mp4 and caption.")
 
     except Exception as e:
-        print(f"❌ Error with Reel {i + 1}: {e}")
+        print(f"Error with Reel {i + 1}: {e}")
 
     # Always increment counter
     counter = i + 1
@@ -70,6 +73,6 @@ with open(COUNTER_FILE, "w", encoding="utf-8") as f:
     f.write(str(counter))
 
 if updated:
-    print(f"✅ All reels processed up to counter: {counter}")
+    print(f"All reels processed up to counter: {counter}")
 else:
-    print("🚫 Nothing new to process.")
+    print("Nothing new to process.")
