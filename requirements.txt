@@ -2,4 +2,4 @@ selenium
 webdriver-manager
 beautifulsoup4
 pandas
-yt-dlp
+instaloader
