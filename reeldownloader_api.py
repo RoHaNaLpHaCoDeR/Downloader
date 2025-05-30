@@ -21,16 +21,16 @@ with open("links.txt", "r", encoding="utf-8") as lfile:
 
 # === SETUP ===
 L = instaloader.Instaloader(download_comments=False, save_metadata=False, post_metadata_txt_pattern="")
-session_file = f"{USERNAME}.session"
+session_path = Path(__file__).parent / f"session-{USERNAME}"
 
 # Try to load session or login and save session
 try:
-    L.load_session_from_file(USERNAME)
+    L.load_session_from_file(USERNAME, sessionfile=str(session_path))
     print(f"Session loaded for {USERNAME}")
 except FileNotFoundError:
     print(f"No session found. Logging in as {USERNAME}...")
     L.login(USERNAME, PASSWORD)
-    L.save_session_to_file()
+    L.save_session_to_file(sessionfile=str(session_path))
     print("Session saved!")
 
 # Create download folder
