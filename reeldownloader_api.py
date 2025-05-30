@@ -79,9 +79,14 @@ for i in range(counter - 1, len(reel_urls)):
         shutil.rmtree(temp_folder)
 
     except Exception as e:
-        print(f"Error with {url}: {e}")
-        updated_links.append(url + " - error")
-        continue
+        if "login_required" in str(e):
+            print(f"Login required error for {url}, skipping this reel.")
+            updated_links.append(f"{url} - login_required error")
+            continue
+        else:
+            print(f"Error with {url}: {e}")
+            updated_links.append(url + " - error")
+            continue
 
 # Save updated counter
 with open("counter.txt", "w", encoding="utf-8") as cfile:
