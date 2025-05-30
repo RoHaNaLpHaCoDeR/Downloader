@@ -4,6 +4,7 @@ from pathlib import Path
 import shutil
 import sys
 import io
+import random
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
@@ -87,6 +88,10 @@ for i in range(counter - 1, len(reel_urls)):
             print(f"Error with {url}: {e}")
             updated_links.append(url + " - error")
             continue
+
+    delay = random.randint(60, 120)
+    print(f"Sleeping for {delay} seconds to avoid hitting API limits...")
+    time.sleep(delay)
 
 # Save updated counter
 with open("counter.txt", "w", encoding="utf-8") as cfile:
