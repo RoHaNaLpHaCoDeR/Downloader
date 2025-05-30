@@ -16,15 +16,17 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: Install ffmpeg
-        shell: pwsh
+      - name: Download and extract FFmpeg
+        shell: powershell
         run: |
           Invoke-WebRequest -Uri https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip -OutFile ffmpeg.zip
-          Expand-Archive ffmpeg.zip -DestinationPath $Env:USERPROFILE\ffmpeg
-          $Env:PATH += ";$Env:USERPROFILE\ffmpeg\ffmpeg-release-essentials\bin"
-          echo "FFMPEG_PATH=$Env:USERPROFILE\ffmpeg\ffmpeg-release-essentials\bin" >> $Env:GITHUB_ENV
-          # Verify installation
-          & $Env:USERPROFILE\ffmpeg\ffmpeg-release-essentials\bin\ffmpeg.exe -version
+          Expand-Archive -Path ffmpeg.zip -DestinationPath $Env:USERPROFILE\ffmpeg
+          $ffmpegFolder = Get-ChildItem "$Env:USERPROFILE\ffmpeg" | Where-Object { $_.PSIsContainer } | Select-Object -First 1
+          $ffmpegPath = "$($ffmpegFolder.FullName)\bin"
+          echo "##[add-path]$ffmpegPath"
+
+      - name: Add FFmpeg to PATH
+        run: echo "$Env:USERPROFILE\ffmpeg\ffmpeg-release-essentials\bin" | Out-File -Append -Encoding ascii $env:GITHUB_PATH
 
       - name: Install dependencies
         run: |
