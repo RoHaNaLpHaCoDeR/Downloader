@@ -119,8 +119,8 @@ def rename_and_move_downloaded_file(temp_folder, videos_folder, counter_file, re
         size_mb = os.path.getsize(renamed_path) / (1024 * 1024)
         print(f"File size (MB): {size_mb}")
         if size_mb > 100:
-            print(f"File {renamed_path} is too large ({size_mb:.2f} MB). Removing...")
-            os.remove(renamed_path)
+            print(f"File {renamed_path} is too large ({size_mb:.2f} MB).")
+            # os.remove(renamed_path)
 
             # Update links.txt to mark the link as "LARGE FILE"
             with open(links_file, 'r', encoding='utf-8') as file:
@@ -173,11 +173,11 @@ def download_instagram_reels_sssinstagram(reel_url, temp_folder, videos_folder, 
         print(f"[LOG] Download link extracted: {video_download_link}")
         
         # Download the video manually using the extracted href link
-        time.sleep(10)
+        time.sleep(30)
         print("[LOG] Navigating to the video download link...")
         driver.get(video_download_link)
         print("[LOG] Waiting for the download to start...")
-        time.sleep(10)  # Give time for the download to start
+        time.sleep(30)  # Give time for the download to start
         
         # Rename the file after download
         print("[LOG] Attempting to rename and move the downloaded file...")
@@ -202,9 +202,19 @@ def download_with_retry(reel_url, temp_folder, videos_folder, counter_file, link
     while attempt < max_retries and not success:
         print(f"[LOG] Attempt {attempt + 1} for reel: {reel_url}")
         number = download_instagram_reels_sssinstagram(reel_url, temp_folder, videos_folder, counter_file, links_file)
-        if number == 1:
+        counter = get_counter_value(counter_file)
+        video_filename = f"Video_{counter}.mp4"
+        video_path = os.path.join(videos_folder, video_filename)
+        
+        if number == 1 and os.path.exists(video_path):
+            print(f"[LOG] File {video_filename} already exists in {videos_folder}. Skipping download.")
             success = True
             print(f"[LOG] Successfully downloaded reel after {attempt + 1} attempts: {reel_url}")
+            size_mb = os.path.getsize(video_path) / (1024 * 1024)
+            print(f"File size (MB): {size_mb}")
+            if size_mb > 100:
+                print(f"File {video_path} is too large ({size_mb:.2f} MB). Removing...")
+                os.remove(video_path)
             break
         else:
             attempt += 1
