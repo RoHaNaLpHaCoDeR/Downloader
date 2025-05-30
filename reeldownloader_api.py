@@ -5,6 +5,7 @@ import shutil
 import sys
 import io
 import random
+import time
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
@@ -80,16 +81,11 @@ for i in range(counter - 1, len(reel_urls)):
         shutil.rmtree(temp_folder)
 
     except Exception as e:
-        if "login_required" in str(e):
-            print(f"Login required error for {url}, skipping this reel.")
-            updated_links.append(f"{url} - login_required error")
-            continue
-        else:
-            print(f"Error with {url}: {e}")
-            updated_links.append(url + " - error")
-            continue
+        print(f"Error with {url}: {e}")
+        updated_links.append(url + " - error")
+        continue
 
-    delay = random.randint(60, 120)
+    delay = random.randint(60, 70)
     print(f"Sleeping for {delay} seconds to avoid hitting API limits...")
     time.sleep(delay)
 
