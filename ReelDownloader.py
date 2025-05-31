@@ -95,7 +95,7 @@ def increment_counter(counter_file):
         f.write(str(value))
     return value
 
-def rename_and_move_downloaded_file(temp_folder, videos_folder, counter_file, reel_url, links_file):
+def rename_and_move_downloaded_file(temp_folder, videos_folder, counter, reel_url, links_file):
     print(f"[LOG] Starting rename_and_move_downloaded_file for reel: {reel_url}")
     # Wait until there are no active downloads
     # while not is_download_complete(temp_folder):
@@ -109,8 +109,6 @@ def rename_and_move_downloaded_file(temp_folder, videos_folder, counter_file, re
         print(f"Latest file: {latest_file}")
         latest_file_path = os.path.join(temp_folder, latest_file)
         print(f"Latest file path: {latest_file_path}")
-        counter = get_counter_value(counter_file)
-        print(f"Counter value: {counter}")
         new_filename = f"Video_{counter}.mp4"
         print(f"New filename: {new_filename}")
         renamed_path = os.path.join(temp_folder, new_filename)
@@ -136,7 +134,7 @@ def rename_and_move_downloaded_file(temp_folder, videos_folder, counter_file, re
             final_path = os.path.join(videos_folder, new_filename)
             shutil.move(renamed_path, final_path)
             print(f"File renamed and moved to: {final_path}")
-        increment_counter(counter_file)
+        
     print(f"[LOG] Completed rename_and_move_downloaded_file for reel: {reel_url}")
 
 # Function to download Instagram reels using sssinstagram.net
@@ -194,15 +192,14 @@ def download_instagram_reels_sssinstagram(reel_url, temp_folder, videos_folder, 
         return 0
 
 # Add this function to handle retries
-def download_with_retry(reel_url, temp_folder, videos_folder, counter_file, links_file, max_retries=7):
+def download_with_retry(reel_url, temp_folder, videos_folder, counter, links_file, max_retries=7):
     print(f"[LOG] Starting download_with_retry for reel: {reel_url}")
     attempt = 0
     success = False
 
     while attempt < max_retries and not success:
         print(f"[LOG] Attempt {attempt + 1} for reel: {reel_url}")
-        number = download_instagram_reels_sssinstagram(reel_url, temp_folder, videos_folder, counter_file, links_file)
-        counter = get_counter_value(counter_file)
+        number = download_instagram_reels_sssinstagram(reel_url, temp_folder, videos_folder, counter, links_file)
         video_filename = f"Video_{counter}.mp4"
         video_path = os.path.join(videos_folder, video_filename)
         
@@ -219,7 +216,7 @@ def download_with_retry(reel_url, temp_folder, videos_folder, counter_file, link
         else:
             attempt += 1
             print(f"[LOG] Retry {attempt} for reel: {reel_url}")
-            time.sleep(5)  # Wait for a few seconds before retrying
+            time.sleep(10)  # Wait for a few seconds before retrying
     if not success:
         print(f"[LOG] Failed to download reel after {max_retries} attempts: {reel_url}")
 
@@ -236,7 +233,10 @@ def main():
         reel_links = [line.strip() for line in file.readlines()]
         for reel_link in reel_links:
             print(f"Downloading reel: {reel_link}")
-            download_with_retry(reel_link, temp_folder, videos_folder, counter_file, links_file)
+            counter = get_counter_value(counter_file)
+            print(f"Counter value: {counter}")
+            download_with_retry(reel_link, temp_folder, videos_folder, counter, links_file)
+            increment_counter(counter_file)
     print("[LOG] Completed main function.")
 
 if __name__ == "__main__":
